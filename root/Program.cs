@@ -37,8 +37,7 @@ namespace root
 
         static ulong vlevo64(ulong x, int t) => (x << t) | (x >> (64 - t));
 
-        private static uint Ki(int i) =>
-            (uint) vpravo64(Key, i * 8); // циклический сдвиг на 8 бит и обрезка правых 32 бит
+        private static uint Ki(int i) => (uint) vpravo64(Key, i * 8);
 
         private static uint F(uint x1, uint x2, uint x3, uint kI) => (vlevo32(x1, 4) & vpravo32(x2, 3) | x3 >> 2) ^ kI;
 
@@ -83,7 +82,6 @@ namespace root
             var x3 = BitConverter.ToUInt32(block, BlockBranchSize * 2);
             var x4 = BitConverter.ToUInt32(block, BlockBranchSize * 3);
 
-            // Выполняются 8 раундов шифрования
             for (var i = N - 1; i >= 0; i--)
             {
                 var keyI = Ki(i);
@@ -205,29 +203,6 @@ namespace root
 
             data = decrypted;
         }
-
-
-        // 	// 1.3. Шифрование в режиме OFB (режим обратной связи по выходу)
-        // 	UInt64[] msg_ofb = new UInt64[B];
-        // 	Console.WriteLine("\nShifr OFB:");
-        // 	blok = IV; // дополнительный ключ для зашифровки блоков текста
-        // 	
-        // 	for (int b = 0; b < B; b++)
-        // 	{
-        // 		blok = shifr(blok);	// на каждом шаге шифруется этот дополнительный ключ
-        // 		msg_ofb[b] = blok ^ msg[b]; // и xor'ится с очередным блоком сообщения - получается зашифрованный блок сообщения
-        // 		Console.Write("{0:X} ", msg_ofb[b]);	// выводим зашифрованный блок на консоль
-        // 		// В зашифрованном тексте все блоки будут разными, не смотря на то что в исходном сообщении они повторялись
-        // 	}
-        // 	// 2.3. Расшифровка в режиме OFB (режим обратной связи по выходу)
-        // 	Console.WriteLine("\nText OFB:");
-        // 	blok = IV; // дополнительный ключ для расшифровки блоков текста
-        // 	for (int b = 0; b < B; b++)
-        // 	{
-        // 		blok = shifr(blok);	// на каждом шаге шифруется этот дополнительный ключ (точно так же как при шифровании)
-        // 		msg_b = blok ^ msg_ofb[b];	// расшифрованный блок сообщения получается в результате операции xor зашифрованного блока сообщения и этого ключа
-        // 		Console.Write("{0:X} ", msg_b);	// выводим расшифрованный блок на консоль
-        // 	}	
 
         public static void Main()
         {
