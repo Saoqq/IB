@@ -9,7 +9,7 @@ namespace root
 {
     public static class Program
     {
-        enum EncryptionMode
+        private enum EncryptionMode
         {
             ECB,
             CBC,
