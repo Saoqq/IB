@@ -43,10 +43,7 @@ namespace root
 
         private static byte[] EncodeBlock(byte[] block)
         {
-            var x1 = BitConverter.ToUInt32(block, 0);
-            var x2 = BitConverter.ToUInt32(block, BlockBranchSize);
-            var x3 = BitConverter.ToUInt32(block, BlockBranchSize * 2);
-            var x4 = BitConverter.ToUInt32(block, BlockBranchSize * 3);
+            ExtractBranches(block, out var x1, out var x2, out var x3, out var x4);
 
             for (var i = 0; i < N; i++)
             {
@@ -66,6 +63,11 @@ namespace root
                 }
             }
 
+            return BranchesToBlock(x1, x2, x3, x4);
+        }
+
+        private static byte[] BranchesToBlock(uint x1, uint x2, uint x3, uint x4)
+        {
             return new[]
             {
                 BitConverter.GetBytes(x1),
@@ -77,10 +79,7 @@ namespace root
 
         private static byte[] DecodeBlock(byte[] block)
         {
-            var x1 = BitConverter.ToUInt32(block, 0);
-            var x2 = BitConverter.ToUInt32(block, BlockBranchSize);
-            var x3 = BitConverter.ToUInt32(block, BlockBranchSize * 2);
-            var x4 = BitConverter.ToUInt32(block, BlockBranchSize * 3);
+            ExtractBranches(block, out var x1, out var x2, out var x3, out var x4);
 
             for (var i = N - 1; i >= 0; i--)
             {
@@ -100,13 +99,15 @@ namespace root
                 }
             }
 
-            return new[]
-            {
-                BitConverter.GetBytes(x1),
-                BitConverter.GetBytes(x2),
-                BitConverter.GetBytes(x3),
-                BitConverter.GetBytes(x4)
-            }.SelectMany(x => x).ToArray();
+            return BranchesToBlock(x1, x2, x3, x4);
+        }
+
+        private static void ExtractBranches(byte[] block, out uint x1, out uint x2, out uint x3, out uint x4)
+        {
+            x1 = BitConverter.ToUInt32(block, 0);
+            x2 = BitConverter.ToUInt32(block, BlockBranchSize);
+            x3 = BitConverter.ToUInt32(block, BlockBranchSize * 2);
+            x4 = BitConverter.ToUInt32(block, BlockBranchSize * 3);
         }
 
         private static void Encode(ref byte[] data, EncryptionMode mode)
@@ -221,9 +222,10 @@ namespace root
             Console.WriteLine(Encoding.UTF8.GetString(bytes));
             Decode(ref bytes, EncryptionMode.OFB);
 
-            File.WriteAllBytes(@"C:\Users\Saoq\RiderProjects\IB\root\decoded.txt", bytes);
-            Array.Resize(ref bytes, bytes.Length - trailingBytesCount);
-            Console.WriteLine(Encoding.UTF8.GetString(bytes));
+            var decoded = Encoding.UTF8.GetString(bytes).TrimEnd('\0');
+            File.WriteAllText(@"C:\Users\Saoq\RiderProjects\IB\root\decoded.txt", decoded);
+            // Array.Resize(ref bytes, bytes.Length - trailingBytesCount);
+            Console.WriteLine(decoded);
         }
     }
 }
